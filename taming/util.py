@@ -1,3 +1,4 @@
+import importlib
 import os, hashlib
 import requests
 from tqdm import tqdm
@@ -44,6 +45,20 @@ def get_ckpt_path(name, root, check=False):
     return path
 
 
+def get_obj_from_str(string, reload=False):
+    module, cls = string.rsplit(".", 1)
+    if reload:
+        module_imp = importlib.import_module(module)
+        importlib.reload(module_imp)
+    return getattr(importlib.import_module(module, package=None), cls)
+
+
+def instantiate_from_config(config, config_key="target", param_key="params"):
+    if "target" not in config:
+        raise KeyError(f"Expected key `{config_key}` to instantiate.")
+    return get_obj_from_str(config[config_key])(**config.get(param_key, dict()))
+
+
 class KeyNotFoundError(Exception):
     def __init__(self, cause, keys=None, visited=None):
         self.cause = cause
@@ -60,7 +75,7 @@ class KeyNotFoundError(Exception):
 
 
 def retrieve(
-    list_or_dict, key, splitval="/", default=None, expand=True, pass_success=False
+        list_or_dict, key, splitval="/", default=None, expand=True, pass_success=False
 ):
     """Given a nested list or dict return the desired value at key expanding
     callable nodes if necessary and :attr:`expand` is ``True``. The expansion
@@ -151,7 +166,7 @@ if __name__ == "__main__":
                    }
               }
     from omegaconf import OmegaConf
+
     config = OmegaConf.create(config)
     print(config)
     retrieve(config, "keya")
-

@@ -14,6 +14,7 @@ from PIL import Image
 from tqdm import tqdm
 from taming.models.lfqgan import VQModel
 import argparse
+from taming.util import instantiate_from_config
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -34,10 +35,6 @@ def get_obj_from_str(string, reload=False):
     return getattr(importlib.import_module(module, package=None), cls)
 
 
-def instantiate_from_config(config):
-    if not "class_path" in config:
-        raise KeyError("Expected key `class_path` to instantiate.")
-    return get_obj_from_str(config["class_path"])(**config.get("init_args", dict()))
 
 def custom_to_pil(x):
   x = x.detach().cpu()
@@ -69,7 +66,7 @@ def main(args):
     if not os.path.exists(visualize_rec):
        os.makedirs(visualize_rec, exist_ok=True)
     
-    dataset = instantiate_from_config(configs.data)
+    dataset = instantiate_from_config(configs.data, config_key="class_path", param_key="init_args")
     dataset.prepare_data()
     dataset.setup()
 

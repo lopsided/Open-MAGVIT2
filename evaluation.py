@@ -18,6 +18,7 @@ from tqdm import tqdm
 from scipy import linalg
 
 from taming.models.lfqgan import VQModel
+from taming.util import instantiate_from_config
 from metrics.inception import InceptionV3
 import lpips
 from skimage.metrics import peak_signal_noise_ratio as psnr_loss
@@ -49,10 +50,6 @@ def get_obj_from_str(string, reload=False):
     return getattr(importlib.import_module(module, package=None), cls)
 
 
-def instantiate_from_config(config):
-    if not "class_path" in config:
-        raise KeyError("Expected key `class_path` to instantiate.")
-    return get_obj_from_str(config["class_path"])(**config.get("init_args", dict()))
 
 def custom_to_pil(x):
   x = x.detach().cpu()
@@ -145,7 +142,7 @@ def main():
     inception_model = InceptionV3([block_idx]).to(DEVICE)
     inception_model.eval()
 
-    dataset = instantiate_from_config(config_data.data)
+    dataset = instantiate_from_config(config_data.data, config_key="class_path", param_key="init_args")
     dataset.prepare_data()
     dataset.setup()
     pred_xs = []

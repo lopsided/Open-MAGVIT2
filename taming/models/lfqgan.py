@@ -2,7 +2,6 @@ import torch
 import torch.nn.functional as F
 import lightning as L
 
-from main import instantiate_from_config
 from contextlib import contextmanager
 
 from taming.modules.diffusionmodules.improved_model import Encoder, Decoder
@@ -14,6 +13,8 @@ from taming.modules.scheduler.lr_scheduler import Scheduler_LinearWarmup, Schedu
 from taming.modules.util import requires_grad
 from collections import OrderedDict
 from taming.modules.ema import LitEma
+from taming.util import instantiate_from_config
+
 
 class VQModel(L.LightningModule):
     def __init__(self,

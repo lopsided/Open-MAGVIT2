@@ -3,8 +3,8 @@ import torch
 import torch.nn.functional as F
 import lightning as L
 
-from main import instantiate_from_config
 from taming.modules.util import SOSProvider
+from taming.util import instantiate_from_config
 
 
 def disabled_train(self, mode=True):
@@ -114,7 +114,7 @@ class Net2NetTransformer(L.LightningModule):
 
             target_pre = a_indices_pre
             target_post = a_indices_post
-            
+
             logits, _ = self.transformer(cz_indices)
 
             logits_pre, logits_post = logits[0], logits[1]
@@ -234,7 +234,7 @@ class Net2NetTransformer(L.LightningModule):
             # index_post[index_post < 0] = 0 #in case the overflow of index but usually not happended
             quant_pre = self.first_stage_model.quantize.get_codebook_entry(index_pre, bhwc)
             quant_post = self.first_stage_model.quantize.get_codebook_entry(index_post, bhwc)
-            quant_z = torch.concat([quant_pre, quant_post], dim=1) # concate in the final dimension 
+            quant_z = torch.concat([quant_pre, quant_post], dim=1) # concate in the final dimension
             x = self.first_stage_model.decode(quant_z)
         else:
             # index = self.permuter(index, reverse=True)
